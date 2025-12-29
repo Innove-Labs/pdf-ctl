@@ -3,16 +3,37 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"github.com/Innove-Labs/pdf-ctl/internal/config"
+	"github.com/Innove-Labs/pdf-ctl/internal/db"
+	"github.com/Innove-Labs/pdf-ctl/internal/api"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	mux := http.NewServeMux()
+	cfg := config.Load()
 
-	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("ok"))
+	_, err := db.NewSQLite(cfg.SqlLitePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = db.AutoMigrate(db.DB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	router := gin.Default()
+
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	log.Println("pdfctl server starting on :8080")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	// API endpoints
+
+	router.POST("/upload", api.UploadPDF)
+
+
+	log.Printf("pdfctl starting on %s (%s)", cfg.HTTPAddr, cfg.Env)
+	log.Fatal(router.Run(cfg.HTTPAddr))
 }
