@@ -1,10 +1,10 @@
 package db
 
 import (
-    "github.com/Innove-Labs/pdf-ctl/internal/models"
-    "gorm.io/gorm"
+	"github.com/Innove-Labs/pdf-ctl/internal/models"
+	"gorm.io/gorm"
 )
 
 func AutoMigrate(db *gorm.DB) error {
-    return db.AutoMigrate(&models.User{}, &models.Session{}, &models.Job{})
+	return db.AutoMigrate(&models.User{}, &models.Session{}, &models.Job{}, &models.File{}, &models.JobFile{})
 }

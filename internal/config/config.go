@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/Innove-Labs/pdf-ctl/internal/storage"
 )
 
 type Config struct {
@@ -13,13 +15,18 @@ type Config struct {
 
 	// Files & storage
 	MaxFileSizeMB    int64
-	StoragePath      string
 	FileTTL          time.Duration
 	DeleteOnDownload bool
+	StorageType      string
+
+	S3    storage.S3Config
+	Local storage.LocalConfig
 
 	// Limits
 	AnonMaxJobsPerHour int
 	UserMaxJobsPerHour int
+
+	MAX_WORKERS int
 
 	// Environment
 	Env string
@@ -88,22 +95,31 @@ func (c *Config) validate() {
 	}
 }
 
-
-
 func Load() *Config {
 	cfg := &Config{
 		HTTPAddr:           getEnv("HTTP_ADDR", ":8080"),
-		StoragePath:        getEnv("STORAGE_PATH", "./tmp"),
+		StorageType:        getEnv("STORAGE_TYPE", "local"),
 		Env:                getEnv("ENV", "dev"),
 		DeleteOnDownload:   getEnvBool("DELETE_ON_DOWNLOAD", true),
 		MaxFileSizeMB:      getEnvInt64("MAX_FILE_SIZE_MB", 50),
 		AnonMaxJobsPerHour: getEnvInt("ANON_MAX_JOBS_PER_HOUR", 5),
 		UserMaxJobsPerHour: getEnvInt("USER_MAX_JOBS_PER_HOUR", 50),
 		FileTTL:            getEnvDuration("FILE_TTL", 10*time.Minute),
-		SqlLitePath:      getEnv("SQLITE_PATH", "./DB/pdfctl.db"),
+		SqlLitePath:        getEnv("SQLITE_PATH", "./DB/pdfctl.db"),
+
+		MAX_WORKERS: getEnvInt("MAX_WORKERS", 5),
+
+		Local: storage.LocalConfig{
+			BasePath: getEnv("STORAGE_LOCAL_BASE_PATH", "./uploads"),
+		},
+
+		S3: storage.S3Config{
+			Bucket: getEnv("STORAGE_S3_BUCKET", ""),
+			Region: getEnv("STORAGE_S3_REGION", ""),
+			Prefix: getEnv("STORAGE_S3_PREFIX", ""),
+		},
 	}
 
 	cfg.validate()
 	return cfg
 }
-
