@@ -18,11 +18,12 @@ type ProcessWorker struct {
 	jobChan chan *models.Job
 }
 
-func NewProcessWorker(db *gorm.DB, maxWorkers int) *ProcessWorker {
+func NewProcessWorker(db *gorm.DB, maxWorkers int, store storage.Storage) *ProcessWorker {
 	return &ProcessWorker{
 		DB:           db,
 		MaxWorkers:   maxWorkers,
 		PollInterval: 1 * time.Second,
+		Storage:      store,
 		jobChan:      make(chan *models.Job, maxWorkers),
 	}
 }

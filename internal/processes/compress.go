@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/google/uuid"
 
@@ -12,14 +11,6 @@ import (
 )
 
 type Compress struct{}
-
-func fileSize(path string) int64 {
-	info, err := os.Stat(path)
-	if err != nil {
-		return 0
-	}
-	return info.Size()
-}
 
 func (c *Compress) Run(ctx Context, job *models.Job) error {
 	var inputs []models.JobFile
@@ -40,10 +31,30 @@ func (c *Compress) Run(ctx Context, job *models.Job) error {
 		return err
 	}
 
-	outputPath := filepath.Join(
-		filepath.Dir(inputFile.StorageKey),
-		uuid.NewString()+".pdf",
-	)
+	reader, err := ctx.Storage.Load(inputFile.StorageKey)
+	if err != nil {
+		return fmt.Errorf("failed to load input file: %w", err)
+	}
+	defer reader.Close()
+
+	tmpIn, err := os.CreateTemp("", "pdfctl-in-*.pdf")
+	if err != nil {
+		return fmt.Errorf("failed to create temp input: %w", err)
+	}
+	defer os.Remove(tmpIn.Name())
+	defer tmpIn.Close()
+
+	if _, err := tmpIn.ReadFrom(reader); err != nil {
+		return fmt.Errorf("failed to write temp input: %w", err)
+	}
+	tmpIn.Close()
+
+	tmpOut, err := os.CreateTemp("", "pdfctl-out-*.pdf")
+	if err != nil {
+		return fmt.Errorf("failed to create temp output: %w", err)
+	}
+	defer os.Remove(tmpOut.Name())
+	tmpOut.Close()
 
 	cmd := exec.Command(
 		"gs",
@@ -53,22 +64,37 @@ func (c *Compress) Run(ctx Context, job *models.Job) error {
 		"-dNOPAUSE",
 		"-dQUIET",
 		"-dBATCH",
-		"-sOutputFile="+outputPath,
-		inputFile.StorageKey,
+		"-sOutputFile="+tmpOut.Name(),
+		tmpIn.Name(),
 	)
 
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("ghostscript failed: %s", string(out))
 	}
 
+	// Save output through the storage abstraction
+	result, err := os.Open(tmpOut.Name())
+	if err != nil {
+		return fmt.Errorf("failed to open temp output: %w", err)
+	}
+	defer result.Close()
+
+	info, _ := result.Stat()
+	outputID := uuid.New()
+	storageKey := outputID.String() + "_compressed.pdf"
+
+	if err := ctx.Storage.Save(storageKey, result); err != nil {
+		return fmt.Errorf("failed to save output file: %w", err)
+	}
+
 	outputFile := models.File{
-		ID:          uuid.New(),
+		ID:          outputID,
 		FileName:    "compressed.pdf",
 		Extension:   "pdf",
 		ContentType: "application/pdf",
-		SizeBytes:   fileSize(outputPath),
+		SizeBytes:   info.Size(),
 		StorageType: inputFile.StorageType,
-		StorageKey:  outputPath,
+		StorageKey:  storageKey,
 	}
 
 	if err := ctx.DB.Create(&outputFile).Error; err != nil {

@@ -25,20 +25,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	router := gin.Default()
-
-	process_worker := worker.NewProcessWorker(connection, cfg.MAX_WORKERS)
-	process_worker.Start()
-
-	gin.SetMode(gin.DebugMode)
-
-	if cfg.Env == "prod" {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
-	router.Use(gin.Logger())
-	router.Use(gin.Recovery())
-
 	store, err := storage.New(
 		storage.Config{
 			StorageType: cfg.StorageType,
@@ -52,26 +38,33 @@ func main() {
 			},
 		},
 	)
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	router.GET("/health", func(c *gin.Context) {
+	process_worker := worker.NewProcessWorker(connection, cfg.MAX_WORKERS, store)
+	go process_worker.Start()
+
+	gin.SetMode(gin.DebugMode)
+	if cfg.Env == "prod" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	router := gin.Default()
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+
+	router.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	// API endpoints
-
+	// handlers
 	fileHandler := api.NewFileUploadHandler(store)
-
-	// operation end points
 	jobHandler := api.NewJobHandler(connection)
 
-	router.POST("/jobs/compress", jobHandler.CreateCompressJob)
+	router.POST("/api/jobs/compress", jobHandler.CreateCompressJob)
 
-	// Upload end points
-	router.POST("/file", fileHandler.Upload)
+	router.POST("/api/file", fileHandler.Upload)
 
 	log.Printf("pdfctl starting on %s (%s)", cfg.HTTPAddr, cfg.Env)
 	log.Fatal(router.Run(cfg.HTTPAddr))
