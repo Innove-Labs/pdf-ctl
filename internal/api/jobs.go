@@ -1,9 +1,11 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/Innove-Labs/pdf-ctl/internal/models"
+	"github.com/Innove-Labs/pdf-ctl/internal/types"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -14,7 +16,11 @@ type CreateCompressJobRequest struct {
 }
 
 type CreateSplitJobRequest struct {
-	FileID string `json:"file_id" binding:"required,uuid"`
+	FileID string            `json:"file_id" binding:"required,uuid"`
+	Mode   string            `json:"mode" binding:"required,oneof=pages all n-pages range"`
+	Pages  []int             `json:"pages,omitempty"`
+	NPages int               `json:"n_pages,omitempty"`
+	Ranges []types.PageRange `json:"ranges,omitempty"`
 }
 
 type JobResponse struct {
@@ -112,5 +118,61 @@ func (h *JobHandler) GetJobStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"job_id": job.ID,
 		"status": job.Status,
+	})
+}
+
+func (h *JobHandler) CreateSplitJob(c *gin.Context) {
+	var req CreateSplitJobRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var file models.File
+	if err := h.DB.First(&file, "id = ?", req.FileID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "file not found"})
+		return
+	}
+
+	paramsData := types.SplitPDFParams{
+		Mode:   req.Mode,
+		Pages:  req.Pages,
+		NPages: req.NPages,
+		Ranges: req.Ranges,
+	}
+	paramsJSON, _ := json.Marshal(paramsData)
+
+	job := models.Job{
+		ID:            uuid.NewString(),
+		OperationType: models.OperationSplit,
+		Status:        models.StatusPending,
+		Params:        string(paramsJSON),
+	}
+
+	input := models.JobFile{
+		JobID:    job.ID,
+		FileID:   req.FileID,
+		Role:     models.JobFileInput,
+		Position: 0,
+	}
+
+	err := h.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&job).Error; err != nil {
+			return err
+		}
+		if err := tx.Create(&input).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create job"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, JobResponse{
+		JobID:  job.ID,
+		Status: job.Status,
 	})
 }

@@ -64,6 +64,7 @@ func main() {
 
 	// backend routes
 	router.POST("/api/jobs/compress", jobHandler.CreateCompressJob)
+	router.POST("/api/jobs/split", jobHandler.CreateSplitJob)
 	router.POST("/api/file", fileHandler.Upload)
 	router.GET("/api/job/status/:id", jobHandler.GetJobStatus)
 	router.GET("/api/file/:id/download", fileHandler.Download)
