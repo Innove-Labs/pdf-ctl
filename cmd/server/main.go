@@ -62,9 +62,16 @@ func main() {
 	fileHandler := api.NewFileUploadHandler(store)
 	jobHandler := api.NewJobHandler(connection)
 
+	// backend routes
 	router.POST("/api/jobs/compress", jobHandler.CreateCompressJob)
-
 	router.POST("/api/file", fileHandler.Upload)
+	router.GET("/api/job/status/:id", jobHandler.GetJobStatus)
+	router.GET("/api/file/:id/download", fileHandler.Download)
+
+	webFS := http.FileServer(http.Dir("./web"))
+	router.NoRoute(func(c *gin.Context) {
+		webFS.ServeHTTP(c.Writer, c.Request)
+	})
 
 	log.Printf("pdfctl starting on %s (%s)", cfg.HTTPAddr, cfg.Env)
 	log.Fatal(router.Run(cfg.HTTPAddr))

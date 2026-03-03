@@ -76,3 +76,41 @@ func (h *JobHandler) CreateCompressJob(c *gin.Context) {
 		Status: job.Status,
 	})
 }
+
+func (h *JobHandler) GetJobStatus(c *gin.Context) {
+	jobID := c.Param("id")
+	var job models.Job
+	if err := h.DB.First(&job, "id = ?", jobID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "job not found"})
+		return
+	}
+
+	if job.Status == models.StatusCompleted {
+		var outputFiles []models.JobFile
+		if err := h.DB.Where("job_id = ? AND role = ?", job.ID, models.JobFileOutput).Order("position ASC").Find(&outputFiles).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch output files"})
+			return
+		}
+
+		type outputFile struct {
+			ID       string `json:"id"`
+			Position int    `json:"position"`
+		}
+		out := make([]outputFile, len(outputFiles))
+		for i, f := range outputFiles {
+			out[i] = outputFile{ID: f.FileID, Position: f.Position}
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"job_id":       job.ID,
+			"status":       job.Status,
+			"output_files": out,
+		})
+		return
+
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"job_id": job.ID,
+		"status": job.Status,
+	})
+}

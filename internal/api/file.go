@@ -72,3 +72,29 @@ func (h *FileUploadHandler) Upload(c *gin.Context) {
 		"size_bytes": record.SizeBytes,
 	})
 }
+
+func (h *FileUploadHandler) Download(c *gin.Context) {
+	id := c.Param("id")
+	var fileRecord models.File
+	if err := db.DB.First(&fileRecord, "id = ?", id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "file not found"})
+		return
+	}
+
+	reader, err := h.Storage.Load(fileRecord.StorageKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve file"})
+		return
+	}
+	defer reader.Close()
+
+	c.DataFromReader(
+		http.StatusOK,
+		fileRecord.SizeBytes,
+		fileRecord.ContentType,
+		reader,
+		map[string]string{
+			"Content-Disposition": "attachment; filename=" + fileRecord.FileName,
+		},
+	)
+}
