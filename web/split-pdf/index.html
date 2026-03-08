@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Split PDF — pdfctl</title>
+    <title>Split PDF - PdfCtl</title>
     <meta
       name="description"
       content="Split a PDF by page range, every N pages, at specific page numbers, or into individual pages. Free, private, no sign-up required."
@@ -31,13 +31,15 @@
         --green-soft: #f0fdf4;
         --red-soft: #fef2f2;
         --red: #dc2626;
-        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-sm:
+          0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
         --radius: 12px;
         --radius-sm: 8px;
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
         background: var(--bg);
         color: var(--text-primary);
@@ -163,7 +165,9 @@
         cursor: pointer;
         border: 2px dashed var(--border);
         border-radius: var(--radius);
-        transition: border-color 0.15s, background 0.15s;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
         text-align: center;
         background: var(--surface);
       }
@@ -277,7 +281,9 @@
         border-radius: 4px;
         display: flex;
         align-items: center;
-        transition: color 0.15s, background 0.15s;
+        transition:
+          color 0.15s,
+          background 0.15s;
       }
       .btn-remove:hover {
         color: var(--red);
@@ -327,7 +333,9 @@
         border: 1.5px solid var(--border);
         border-radius: var(--radius-sm);
         background: var(--bg);
-        transition: border-color 0.15s, background 0.15s;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
         cursor: pointer;
         user-select: none;
       }
@@ -356,8 +364,11 @@
         border-color: var(--accent);
         background: var(--accent);
       }
-      .mode-card input[type="radio"]:checked + .mode-card-inner .mode-card-dot::after {
-        content: '';
+      .mode-card
+        input[type="radio"]:checked
+        + .mode-card-inner
+        .mode-card-dot::after {
+        content: "";
         width: 6px;
         height: 6px;
         border-radius: 50%;
@@ -450,7 +461,9 @@
         display: flex;
         align-items: center;
         flex-shrink: 0;
-        transition: color 0.15s, background 0.15s;
+        transition:
+          color 0.15s,
+          background 0.15s;
       }
       .btn-remove-range:hover {
         color: var(--red);
@@ -476,7 +489,9 @@
         font-weight: 600;
         color: var(--text-secondary);
         cursor: pointer;
-        transition: border-color 0.15s, color 0.15s;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
         align-self: flex-start;
       }
       .btn-add-range:hover {
@@ -503,7 +518,9 @@
         border: none;
         border-radius: var(--radius-sm);
         cursor: pointer;
-        transition: background 0.15s, transform 0.1s;
+        transition:
+          background 0.15s,
+          transform 0.1s;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -541,7 +558,9 @@
         animation: spin 0.8s linear infinite;
       }
       @keyframes spin {
-        to { transform: rotate(360deg); }
+        to {
+          transform: rotate(360deg);
+        }
       }
       .processing-panel h2 {
         font-size: 17px;
@@ -763,9 +782,15 @@
       }
 
       @media (max-width: 640px) {
-        main { padding: 32px 16px 60px; }
-        .dropzone { padding: 40px 20px; }
-        .mode-grid { grid-template-columns: 1fr; }
+        main {
+          padding: 32px 16px 60px;
+        }
+        .dropzone {
+          padding: 40px 20px;
+        }
+        .mode-grid {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
@@ -775,8 +800,10 @@
         <a href="/" class="logo">
           <div class="logo-icon">
             <svg viewBox="0 0 24 24">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              />
+              <polyline points="14 2 14 8 20 8" />
             </svg>
           </div>
           <span class="logo-text">pdf<span>ctl</span></span>
@@ -788,15 +815,18 @@
       <div class="page-header">
         <div class="page-icon">
           <svg viewBox="0 0 24 24">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-            <line x1="3" y1="12" x2="21" y2="12"/>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+            <line x1="3" y1="12" x2="21" y2="12" />
           </svg>
         </div>
         <div>
           <h1>Split PDF</h1>
-          <p>Break a document into parts &mdash; by range, page count, or specific cuts.</p>
+          <p>
+            Break a document into parts; by range, page count, or
+            specific cuts.
+          </p>
         </div>
       </div>
 
@@ -808,13 +838,15 @@
         <a href="/" class="logo">
           <div class="logo-icon">
             <svg viewBox="0 0 24 24">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              />
+              <polyline points="14 2 14 8 20 8" />
             </svg>
           </div>
           <span class="logo-text">pdf<span>ctl</span></span>
         </a>
-        <div class="footer-right">Built with Go &amp; pdfcpu &mdash; open source, forever.</div>
+        <div class="footer-right">Built with Go; open source, forever.</div>
       </div>
     </footer>
 
@@ -874,7 +906,8 @@
         const form = new FormData();
         form.append("file", file);
         const res = await fetch("/api/file", { method: "POST", body: form });
-        if (!res.ok) throw new Error((await res.json()).error || "Upload failed");
+        if (!res.ok)
+          throw new Error((await res.json()).error || "Upload failed");
         return res.json();
       }
 
@@ -884,26 +917,34 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error((await res.json()).error || "Failed to create job");
+        if (!res.ok)
+          throw new Error((await res.json()).error || "Failed to create job");
         return res.json();
       }
 
       async function fetchJobStatus(jobId) {
         const res = await fetch(`/api/job/status/${jobId}`);
-        if (!res.ok) throw new Error((await res.json()).error || "Status check failed");
+        if (!res.ok)
+          throw new Error((await res.json()).error || "Status check failed");
         return res.json();
       }
 
       // ── Collect & validate params ──────────────────────────
       function collectParams() {
-        const mode = document.querySelector('input[name="mode"]:checked')?.value;
+        const mode = document.querySelector(
+          'input[name="mode"]:checked',
+        )?.value;
         if (!mode) return { err: "Please select a split mode." };
 
         const payload = { file_id: state.fileId, mode };
 
         if (mode === "n-pages") {
-          const n = parseInt(document.getElementById("param-n-pages").value, 10);
-          if (!n || n < 1) return { err: "Enter a valid number of pages (≥ 1)." };
+          const n = parseInt(
+            document.getElementById("param-n-pages").value,
+            10,
+          );
+          if (!n || n < 1)
+            return { err: "Enter a valid number of pages (≥ 1)." };
           payload.n_pages = n;
         }
 
@@ -912,7 +953,9 @@
           if (!raw) return { err: "Enter at least one page number." };
           const pages = raw.split(",").map((s) => parseInt(s.trim(), 10));
           if (pages.some(isNaN) || pages.some((p) => p < 1)) {
-            return { err: "Page numbers must be positive integers, separated by commas." };
+            return {
+              err: "Page numbers must be positive integers, separated by commas.",
+            };
           }
           payload.pages = pages;
         }
@@ -921,13 +964,22 @@
           const rows = document.querySelectorAll("#range-rows .range-row");
           const ranges = [];
           for (let i = 0; i < rows.length; i++) {
-            const from = parseInt(rows[i].querySelector("[data-range-from]").value, 10);
-            const to = parseInt(rows[i].querySelector("[data-range-to]").value, 10);
-            if (!from || from < 1) return { err: `Range ${i + 1}: "From" must be ≥ 1.` };
-            if (!to || to < from) return { err: `Range ${i + 1}: "To" must be ≥ "From".` };
+            const from = parseInt(
+              rows[i].querySelector("[data-range-from]").value,
+              10,
+            );
+            const to = parseInt(
+              rows[i].querySelector("[data-range-to]").value,
+              10,
+            );
+            if (!from || from < 1)
+              return { err: `Range ${i + 1}: "From" must be ≥ 1.` };
+            if (!to || to < from)
+              return { err: `Range ${i + 1}: "To" must be ≥ "From".` };
             ranges.push({ from, to });
           }
-          if (ranges.length === 0) return { err: "Add at least one page range." };
+          if (ranges.length === 0)
+            return { err: "Add at least one page range." };
           payload.ranges = ranges;
         }
 
@@ -992,7 +1044,8 @@
                 render();
               } else if (data.status === "failed") {
                 stopPolling();
-                state.error = "Split failed. The file may be corrupted or the page range is out of bounds.";
+                state.error =
+                  "Split failed. The file may be corrupted or the page range is out of bounds.";
                 state.phase = "error";
                 render();
               } else {
@@ -1156,37 +1209,48 @@
               </button>
             </div>`;
 
-            document.getElementById("btn-remove").addEventListener("click", reset);
-            document.getElementById("btn-split").addEventListener("click", handleSplit);
+            document
+              .getElementById("btn-remove")
+              .addEventListener("click", reset);
+            document
+              .getElementById("btn-split")
+              .addEventListener("click", handleSplit);
 
             // Show/hide param panels on mode change
             document.querySelectorAll('input[name="mode"]').forEach((radio) => {
               radio.addEventListener("change", () => {
-                document.getElementById("params-n-pages").hidden = radio.value !== "n-pages";
-                document.getElementById("params-pages").hidden = radio.value !== "pages";
-                document.getElementById("params-range").hidden = radio.value !== "range";
+                document.getElementById("params-n-pages").hidden =
+                  radio.value !== "n-pages";
+                document.getElementById("params-pages").hidden =
+                  radio.value !== "pages";
+                document.getElementById("params-range").hidden =
+                  radio.value !== "range";
               });
             });
 
             // Add/remove range rows
-            document.getElementById("btn-add-range").addEventListener("click", () => {
-              const container = document.getElementById("range-rows");
-              const row = document.createElement("div");
-              row.className = "range-row";
-              row.innerHTML = `
+            document
+              .getElementById("btn-add-range")
+              .addEventListener("click", () => {
+                const container = document.getElementById("range-rows");
+                const row = document.createElement("div");
+                row.className = "range-row";
+                row.innerHTML = `
                 <input class="param-input" type="number" min="1" placeholder="From" data-range-from />
                 <span class="range-sep">to</span>
                 <input class="param-input" type="number" min="1" placeholder="To" data-range-to />
                 <button class="btn-remove-range" type="button" title="Remove range">
                   <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>`;
-              row.querySelector(".btn-remove-range").addEventListener("click", () => {
-                row.remove();
+                row
+                  .querySelector(".btn-remove-range")
+                  .addEventListener("click", () => {
+                    row.remove();
+                    syncRemoveButtons();
+                  });
+                container.appendChild(row);
                 syncRemoveButtons();
               });
-              container.appendChild(row);
-              syncRemoveButtons();
-            });
 
             function syncRemoveButtons() {
               const rows = document.querySelectorAll("#range-rows .range-row");
@@ -1198,8 +1262,10 @@
             break;
 
           case "processing": {
-            const label = state.jobStatus === "processing" ? "Processing" : "Queued";
-            const badgeClass = state.jobStatus === "processing" ? "processing" : "";
+            const label =
+              state.jobStatus === "processing" ? "Processing" : "Queued";
+            const badgeClass =
+              state.jobStatus === "processing" ? "processing" : "";
             card.innerHTML = `
             <div class="processing-panel">
               <div class="spinner"></div>
@@ -1211,9 +1277,12 @@
           }
 
           case "done": {
-            const sorted = [...state.outputFiles].sort((a, b) => a.position - b.position);
+            const sorted = [...state.outputFiles].sort(
+              (a, b) => a.position - b.position,
+            );
             const items = sorted
-              .map((f, i) => `
+              .map(
+                (f, i) => `
               <div class="download-item">
                 <div class="download-item-label">
                   <svg viewBox="0 0 24 24">
@@ -1233,7 +1302,8 @@
                   </svg>
                   Download
                 </a>
-              </div>`)
+              </div>`,
+              )
               .join("");
 
             card.innerHTML = `
@@ -1251,7 +1321,9 @@
               <button class="btn-again" id="btn-again">Split another PDF</button>
             </div>`;
 
-            document.getElementById("btn-again").addEventListener("click", reset);
+            document
+              .getElementById("btn-again")
+              .addEventListener("click", reset);
             break;
           }
 
@@ -1265,7 +1337,9 @@
               <p>${escHtml(state.error || "An unexpected error occurred. Please try again.")}</p>
               <button class="btn-retry" id="btn-retry">Try again</button>
             </div>`;
-            document.getElementById("btn-retry").addEventListener("click", reset);
+            document
+              .getElementById("btn-retry")
+              .addEventListener("click", reset);
             break;
         }
       }
@@ -1286,7 +1360,9 @@
           e.preventDefault();
           zone.classList.add("drag-over");
         });
-        zone.addEventListener("dragleave", () => zone.classList.remove("drag-over"));
+        zone.addEventListener("dragleave", () =>
+          zone.classList.remove("drag-over"),
+        );
         zone.addEventListener("drop", (e) => {
           e.preventDefault();
           zone.classList.remove("drag-over");
