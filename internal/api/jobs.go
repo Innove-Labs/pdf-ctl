@@ -176,3 +176,47 @@ func (h *JobHandler) CreateSplitJob(c *gin.Context) {
 		Status: job.Status,
 	})
 }
+
+func (h *JobHandler) CreateMergeJob(c *gin.Context) {
+	var req types.MergePdfRequestParams
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	job := models.Job{
+		ID:            uuid.NewString(),
+		OperationType: models.OperationMerge,
+		Status:        models.StatusPending,
+	}
+
+	jobFilesArray := make([]models.JobFile, len(req.Files))
+	for i, f := range req.Files {
+		jobFilesArray[i] = models.JobFile{
+			JobID:    job.ID,
+			FileID:   f.FileID,
+			Role:     models.JobFileInput,
+			Position: f.Position,
+		}
+	}
+
+	err := h.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&job).Error; err != nil {
+			return err
+		}
+		if err := tx.Create(&jobFilesArray).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create job"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, JobResponse{
+		JobID:  job.ID,
+		Status: job.Status,
+	})
+}

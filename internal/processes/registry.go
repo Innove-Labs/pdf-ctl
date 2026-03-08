@@ -5,6 +5,7 @@ import "github.com/Innove-Labs/pdf-ctl/internal/models"
 var registry = map[models.OperationType]Process{
 	models.OperationCompress: &Compress{},
 	models.OperationSplit:    &SplitPdf{},
+	models.OperationMerge:    &MergePdf{},
 }
 
 func Get(op models.OperationType) (Process, bool) {

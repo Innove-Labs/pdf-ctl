@@ -31,6 +31,10 @@ type Config struct {
 	// Environment
 	Env string
 
+	// Cleanup
+	CleanupInterval int
+	CleanUpQuantity int
+
 	// Database
 	SqlLitePath string
 }
@@ -118,6 +122,9 @@ func Load() *Config {
 			Region: getEnv("STORAGE_S3_REGION", ""),
 			Prefix: getEnv("STORAGE_S3_PREFIX", ""),
 		},
+
+		CleanupInterval: getEnvInt("CLEANUP_INTERVAL", 30),
+		CleanUpQuantity: getEnvInt("CLEAN_UP_QUANTITY", 2),
 	}
 
 	cfg.validate()
