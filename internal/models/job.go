@@ -18,9 +18,10 @@ const (
 type OperationType string
 
 const (
-	OperationMerge    OperationType = "merge"
-	OperationSplit    OperationType = "split"
-	OperationCompress OperationType = "compress"
+	OperationMerge        OperationType = "merge"
+	OperationSplit        OperationType = "split"
+	OperationCompress     OperationType = "compress"
+	OperationConvertImage OperationType = "convertImage"
 )
 
 type Job struct {

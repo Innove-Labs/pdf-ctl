@@ -220,3 +220,60 @@ func (h *JobHandler) CreateMergeJob(c *gin.Context) {
 		Status: job.Status,
 	})
 }
+
+func (h *JobHandler) CreateConvertImagesToPdfJob(c *gin.Context) {
+	var req types.ConvertImagesToPdfRequestParams
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if len(req.Files) > 10 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Too Many Files"})
+	}
+
+	params := types.ConvertImageParams{
+		Orientation:  req.Orientation,
+		PageSize:     req.PageSize,
+		MergeIntoOne: req.MergeIntoOne,
+	}
+
+	paramsJson, _ := json.Marshal(params)
+
+	job := models.Job{
+		OperationType: models.OperationConvertImage,
+		ID:            uuid.NewString(),
+		Status:        models.StatusPending,
+		Params:        string(paramsJson),
+	}
+
+	jobFilesArray := make([]models.JobFile, len(req.Files))
+	for i, j := range req.Files {
+		jobFilesArray[i] = models.JobFile{
+			JobID:    job.ID,
+			FileID:   j.FileID,
+			Position: j.Position,
+			Role:     models.JobFileInput,
+		}
+	}
+
+	err := h.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&job).Error; err != nil {
+			return err
+		}
+		if err := tx.Create(&jobFilesArray).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create job"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, JobResponse{
+		JobID:  job.ID,
+		Status: job.Status,
+	})
+}

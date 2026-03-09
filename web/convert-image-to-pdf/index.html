@@ -1,0 +1,1318 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Convert Images to PDF — pdfctl</title>
+    <meta
+      name="description"
+      content="Convert JPG, PNG and other images into a PDF. Free, private, no sign-up required."
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #f8f8f6;
+        --surface: #ffffff;
+        --border: #e8e8e4;
+        --accent: #2563eb;
+        --accent-soft: #eff6ff;
+        --accent-hover: #1d4ed8;
+        --text-primary: #1a1a18;
+        --text-secondary: #6b6b66;
+        --text-muted: #9b9b95;
+        --green: #16a34a;
+        --green-soft: #f0fdf4;
+        --red-soft: #fef2f2;
+        --red: #dc2626;
+        --shadow-sm:
+          0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        --radius: 12px;
+        --radius-sm: 8px;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ── Nav ── */
+      nav {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .nav-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        color: var(--text-primary);
+      }
+      .logo-icon {
+        width: 30px;
+        height: 30px;
+        background: #d4380d;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .logo-icon svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: #fff;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .logo-text {
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+      .logo-text span {
+        color: #d4380d;
+      }
+
+      /* ── Main layout ── */
+      main {
+        flex: 1;
+        max-width: 680px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 48px 24px 80px;
+      }
+
+      /* ── Page header ── */
+      .page-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
+      }
+      .page-icon {
+        width: 44px;
+        height: 44px;
+        background: var(--accent-soft);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .page-icon svg {
+        width: 22px;
+        height: 22px;
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .page-header h1 {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.4px;
+      }
+      .page-header p {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-top: 1px;
+      }
+
+      /* ── Tool card ── */
+      .tool-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+      }
+
+      /* ── File panel ── */
+      .file-panel {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      /* ── Dropzone ── */
+      .dropzone {
+        padding: 40px 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        border: 2px dashed var(--border);
+        border-radius: var(--radius-sm);
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        text-align: center;
+        background: var(--bg);
+      }
+      .dropzone:hover,
+      .dropzone.drag-over {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+      }
+      .dropzone-icon {
+        width: 44px;
+        height: 44px;
+        background: var(--surface);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+      }
+      .dropzone-icon svg {
+        width: 22px;
+        height: 22px;
+        fill: none;
+        stroke: var(--text-muted);
+        stroke-width: 1.6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .dropzone h2 {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+      .dropzone p {
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+      .dropzone .browse-link {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      .dropzone .file-hint {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+      #file-input {
+        display: none;
+      }
+
+      /* ── File list ── */
+      .section-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .file-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .file-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        transition: border-color 0.15s;
+      }
+      .file-row.uploading-row {
+        opacity: 0.7;
+      }
+
+      .file-order {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-muted);
+        width: 20px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      .file-thumb {
+        width: 34px;
+        height: 34px;
+        background: var(--accent-soft);
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        overflow: hidden;
+      }
+      .file-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 7px;
+      }
+      .file-thumb svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .file-thumb.uploading {
+        background: var(--bg);
+      }
+      .file-thumb.uploading svg {
+        stroke: var(--text-muted);
+      }
+
+      .file-meta {
+        flex: 1;
+        min-width: 0;
+      }
+      .file-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .file-status {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 1px;
+      }
+      .file-status.ready {
+        color: var(--green);
+      }
+
+      .row-actions {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        flex-shrink: 0;
+      }
+
+      .btn-icon {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        color: var(--text-muted);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .btn-icon:hover {
+        color: var(--text-primary);
+        background: var(--border);
+      }
+      .btn-icon.remove:hover {
+        color: var(--red);
+        background: var(--red-soft);
+      }
+      .btn-icon svg {
+        width: 14px;
+        height: 14px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .btn-icon:disabled {
+        opacity: 0.3;
+        cursor: default;
+        pointer-events: none;
+      }
+
+      /* ── Inline spinner ── */
+      .spinner-sm {
+        width: 14px;
+        height: 14px;
+        border: 2px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        flex-shrink: 0;
+      }
+
+      /* ── Options row ── */
+      .options-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .option-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1;
+        min-width: 140px;
+      }
+
+      .option-group label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .option-group select {
+        padding: 8px 10px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        color: var(--text-primary);
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.15s;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239b9b95' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        padding-right: 30px;
+      }
+      .option-group select:focus {
+        border-color: var(--accent);
+      }
+
+      /* ── File limit notice ── */
+      .limit-notice {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        color: #92400e;
+        font-weight: 500;
+      }
+      .limit-notice svg {
+        width: 15px;
+        height: 15px;
+        fill: none;
+        stroke: #d97706;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex-shrink: 0;
+      }
+
+      /* ── Toggle ── */
+      .toggle-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+      }
+      .toggle-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        cursor: pointer;
+        flex: 1;
+      }
+      .toggle-group small {
+        font-size: 11px;
+        color: var(--text-muted);
+        display: block;
+        font-weight: 400;
+      }
+      .toggle {
+        position: relative;
+        width: 36px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+      .toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+      }
+      .toggle-track {
+        position: absolute;
+        inset: 0;
+        background: var(--border);
+        border-radius: 99px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .toggle-thumb {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 14px;
+        height: 14px;
+        background: #fff;
+        border-radius: 50%;
+        transition: transform 0.2s;
+        pointer-events: none;
+      }
+      .toggle input:checked ~ .toggle-track {
+        background: var(--accent);
+      }
+      .toggle input:checked ~ .toggle-thumb {
+        transform: translateX(16px);
+      }
+
+      /* ── Action button ── */
+      .btn-convert {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          transform 0.1s,
+          opacity 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn-convert:hover:not(:disabled) {
+        background: var(--accent-hover);
+        transform: translateY(-1px);
+      }
+      .btn-convert:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-convert svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2.2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      /* ── Processing panel ── */
+      .processing-panel {
+        padding: 56px 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        text-align: center;
+      }
+      .spinner {
+        width: 44px;
+        height: 44px;
+        border: 3px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .processing-panel h2 {
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .processing-panel p {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 99px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+      }
+      .status-badge.processing {
+        color: #d97706;
+        background: #fffbeb;
+        border-color: #fde68a;
+      }
+
+      /* ── Done panel ── */
+      .done-panel {
+        padding: 32px;
+      }
+      .done-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .done-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--green-soft);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .done-icon svg {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: var(--green);
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .done-header h2 {
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .done-header p {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-top: 1px;
+      }
+
+      .download-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+
+      .download-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+      }
+      .download-item-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .download-item-label svg {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex-shrink: 0;
+      }
+      .download-item-name {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .btn-download {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--accent);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 14px;
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        transition: background 0.15s;
+        flex-shrink: 0;
+      }
+      .btn-download:hover {
+        background: var(--accent-hover);
+      }
+      .btn-download svg {
+        width: 14px;
+        height: 14px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2.2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .btn-again {
+        width: 100%;
+        padding: 12px;
+        background: var(--surface);
+        color: var(--text-primary);
+        font-size: 14px;
+        font-weight: 600;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .btn-again:hover {
+        background: var(--bg);
+      }
+
+      /* ── Error panel ── */
+      .error-panel {
+        padding: 40px 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        text-align: center;
+      }
+      .error-icon {
+        width: 44px;
+        height: 44px;
+        background: var(--red-soft);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .error-icon svg {
+        width: 22px;
+        height: 22px;
+        fill: none;
+        stroke: var(--red);
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .error-panel h2 {
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .error-panel p {
+        font-size: 14px;
+        color: var(--text-secondary);
+        max-width: 360px;
+      }
+      .btn-retry {
+        margin-top: 4px;
+        padding: 10px 20px;
+        background: var(--text-primary);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .btn-retry:hover {
+        opacity: 0.85;
+      }
+
+      /* ── Footer ── */
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 28px 24px;
+      }
+      .footer-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      .footer-right {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      @media (max-width: 640px) {
+        main {
+          padding: 32px 16px 60px;
+        }
+        .dropzone {
+          padding: 32px 16px;
+        }
+        .options-row {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="nav-inner">
+        <a href="/" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+          </div>
+          <span class="logo-text">pdf<span>ctl</span></span>
+        </a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="page-header">
+        <div class="page-icon">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+        </div>
+        <div>
+          <h1>Convert Images to PDF</h1>
+          <p>Turn JPG, PNG or WebP images into a PDF. Control order, orientation and page size.</p>
+        </div>
+      </div>
+
+      <div class="tool-card" id="tool-card"></div>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <a href="/" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+          </div>
+          <span class="logo-text">pdf<span>ctl</span></span>
+        </a>
+        <div class="footer-right">Built with Go; open source, forever.</div>
+      </div>
+    </footer>
+
+    <input
+      type="file"
+      id="file-input"
+      accept="image/jpeg,image/png,image/webp,image/gif,image/bmp"
+      multiple
+    />
+
+    <script>
+      const MAX_FILES = 10;
+
+      const state = {
+        phase: "idle", // idle | ready | processing | done | error
+        files: [], // [{ file, fileId, uploading, previewUrl }]
+        jobId: null,
+        jobStatus: null,
+        outputFiles: [], // [{ id, position }]
+        error: null,
+        pollTimer: null,
+        orientation: "portrait",
+        pageSize: "A4",
+        mergeIntoOne: true,
+      };
+
+      function fmtBytes(bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+      }
+
+      function escHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function stopPolling() {
+        if (state.pollTimer) {
+          clearInterval(state.pollTimer);
+          state.pollTimer = null;
+        }
+      }
+
+      function reset() {
+        stopPolling();
+        state.files.forEach((f) => {
+          if (f.previewUrl) URL.revokeObjectURL(f.previewUrl);
+        });
+        Object.assign(state, {
+          phase: "idle",
+          files: [],
+          jobId: null,
+          jobStatus: null,
+          outputFiles: [],
+          error: null,
+        });
+        render();
+      }
+
+      function allReady() {
+        return (
+          state.files.length >= 1 &&
+          state.files.every((f) => f.fileId && !f.uploading)
+        );
+      }
+
+      // ── API ────────────────────────────────────────────────
+      async function uploadFile(file) {
+        const form = new FormData();
+        form.append("file", file);
+        const res = await fetch("/api/file", { method: "POST", body: form });
+        if (!res.ok)
+          throw new Error((await res.json()).error || "Upload failed");
+        return res.json();
+      }
+
+      async function createConvertJob() {
+        const body = {
+          files: state.files.map((f, i) => ({
+            file_id: f.fileId,
+            position: i + 1,
+          })),
+          orientation: state.orientation,
+          page_size: state.pageSize,
+          merge_into_one: state.mergeIntoOne,
+        };
+        const res = await fetch("/api/jobs/convert-image-pdf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok)
+          throw new Error((await res.json()).error || "Failed to create job");
+        return res.json();
+      }
+
+      async function fetchJobStatus(jobId) {
+        const res = await fetch(`/api/job/status/${jobId}`);
+        if (!res.ok)
+          throw new Error((await res.json()).error || "Status check failed");
+        return res.json();
+      }
+
+      // ── Actions ────────────────────────────────────────────
+      async function handleFilesChosen(fileList) {
+        const images = Array.from(fileList).filter((f) =>
+          f.type.startsWith("image/"),
+        );
+        if (images.length === 0) return;
+
+        const remaining = MAX_FILES - state.files.length;
+        const toAdd = images.slice(0, remaining);
+
+        for (const file of toAdd) {
+          state.files.push({
+            file,
+            fileId: null,
+            uploading: true,
+            previewUrl: URL.createObjectURL(file),
+          });
+        }
+        state.phase = "ready";
+        render();
+
+        for (let i = 0; i < state.files.length; i++) {
+          const entry = state.files[i];
+          if (entry.uploading && !entry.fileId) {
+            try {
+              const data = await uploadFile(entry.file);
+              entry.fileId = data.id;
+              entry.uploading = false;
+            } catch (e) {
+              state.error = e.message;
+              state.phase = "error";
+              render();
+              return;
+            }
+            render();
+          }
+        }
+      }
+
+      function moveFile(index, dir) {
+        const target = index + dir;
+        if (target < 0 || target >= state.files.length) return;
+        [state.files[index], state.files[target]] = [
+          state.files[target],
+          state.files[index],
+        ];
+        render();
+      }
+
+      function removeFile(index) {
+        const entry = state.files.splice(index, 1)[0];
+        if (entry.previewUrl) URL.revokeObjectURL(entry.previewUrl);
+        if (state.files.length === 0) state.phase = "idle";
+        render();
+      }
+
+      async function handleConvert() {
+        if (!allReady()) return;
+
+        state.phase = "processing";
+        state.jobStatus = "pending";
+        render();
+
+        try {
+          const job = await createConvertJob();
+          state.jobId = job.job_id;
+
+          state.pollTimer = setInterval(async () => {
+            try {
+              const data = await fetchJobStatus(state.jobId);
+              state.jobStatus = data.status;
+
+              if (data.status === "completed") {
+                stopPolling();
+                state.outputFiles = data.output_files || [];
+                state.phase = "done";
+                render();
+              } else if (data.status === "failed") {
+                stopPolling();
+                state.error =
+                  "Conversion failed. One or more images may be unsupported or corrupted.";
+                state.phase = "error";
+                render();
+              } else {
+                render();
+              }
+            } catch (e) {
+              stopPolling();
+              state.error = e.message;
+              state.phase = "error";
+              render();
+            }
+          }, 2000);
+        } catch (e) {
+          state.error = e.message;
+          state.phase = "error";
+          render();
+        }
+      }
+
+      // ── Render ─────────────────────────────────────────────
+      function render() {
+        const card = document.getElementById("tool-card");
+
+        switch (state.phase) {
+          case "idle":
+            card.innerHTML = `
+            <div class="dropzone" id="dropzone">
+              <div class="dropzone-icon">
+                <svg viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </div>
+              <h2>Drop your images here</h2>
+              <p>or <span class="browse-link" id="browse-btn">browse to upload</span></p>
+              <p class="file-hint">JPG, PNG, WebP &mdash; up to ${MAX_FILES} images &mdash; 50 MB each</p>
+            </div>`;
+            bindDropzone();
+            break;
+
+          case "ready": {
+            const fileItems = state.files
+              .map((entry, i) => {
+                const isUploading = entry.uploading;
+                const isReady = !isUploading && entry.fileId;
+                const thumbContent = entry.previewUrl
+                  ? `<img src="${escHtml(entry.previewUrl)}" alt="" />`
+                  : `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+                return `
+              <div class="file-row${isUploading ? " uploading-row" : ""}">
+                <span class="file-order">${i + 1}</span>
+                <div class="file-thumb${isUploading ? " uploading" : ""}">${thumbContent}</div>
+                <div class="file-meta">
+                  <div class="file-name">${escHtml(entry.file.name)}</div>
+                  <div class="file-status${isReady ? " ready" : ""}">
+                    ${isUploading ? "Uploading&hellip;" : isReady ? "Ready" : fmtBytes(entry.file.size)}
+                  </div>
+                </div>
+                ${isUploading ? '<div class="spinner-sm"></div>' : ""}
+                <div class="row-actions">
+                  <button class="btn-icon" data-move="${i}:up" title="Move up"${i === 0 ? " disabled" : ""}>
+                    <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+                  </button>
+                  <button class="btn-icon" data-move="${i}:down" title="Move down"${i === state.files.length - 1 ? " disabled" : ""}>
+                    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  <button class="btn-icon remove" data-remove="${i}" title="Remove">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>`;
+              })
+              .join("");
+
+            const canAddMore = state.files.length < MAX_FILES;
+            const ready = allReady();
+
+            card.innerHTML = `
+            <div class="file-panel">
+              <div>
+                <span class="section-label">Images &mdash; in order (${state.files.length}/${MAX_FILES})</span>
+                <div class="file-list">${fileItems}</div>
+              </div>
+
+              ${canAddMore ? `
+              <div class="dropzone" id="dropzone" style="padding:24px 20px;">
+                <div class="dropzone-icon">
+                  <svg viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                </div>
+                <p>Add more images &mdash; <span class="browse-link" id="browse-btn">browse</span> or drop here</p>
+              </div>` : `
+              <div class="limit-notice">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Maximum of ${MAX_FILES} images reached. Remove one to add another.
+              </div>`}
+
+              <div class="options-row">
+                <div class="option-group">
+                  <label for="orientation-select">Orientation</label>
+                  <select id="orientation-select">
+                    <option value="portrait"${state.orientation === "portrait" ? " selected" : ""}>Portrait</option>
+                    <option value="landscape"${state.orientation === "landscape" ? " selected" : ""}>Landscape</option>
+                  </select>
+                </div>
+                <div class="option-group">
+                  <label for="pagesize-select">Page size</label>
+                  <select id="pagesize-select">
+                    <option value="A4"${state.pageSize === "A4" ? " selected" : ""}>A4</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="toggle-group">
+                <label for="merge-toggle">
+                  Merge into one PDF
+                  <small>All images combined into a single file</small>
+                </label>
+                <label class="toggle">
+                  <input type="checkbox" id="merge-toggle"${state.mergeIntoOne ? " checked" : ""} />
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </label>
+              </div>
+
+              <button class="btn-convert" id="btn-convert" ${ready ? "" : "disabled"}>
+                <svg viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                Convert to PDF
+              </button>
+            </div>`;
+
+            card.querySelectorAll("[data-move]").forEach((btn) => {
+              btn.addEventListener("click", () => {
+                const [idx, dir] = btn.dataset.move.split(":");
+                moveFile(parseInt(idx, 10), dir === "up" ? -1 : 1);
+              });
+            });
+            card.querySelectorAll("[data-remove]").forEach((btn) => {
+              btn.addEventListener("click", () =>
+                removeFile(parseInt(btn.dataset.remove, 10)),
+              );
+            });
+
+            document
+              .getElementById("orientation-select")
+              ?.addEventListener("change", (e) => {
+                state.orientation = e.target.value;
+              });
+            document
+              .getElementById("pagesize-select")
+              ?.addEventListener("change", (e) => {
+                state.pageSize = e.target.value;
+              });
+            document
+              .getElementById("merge-toggle")
+              ?.addEventListener("change", (e) => {
+                state.mergeIntoOne = e.target.checked;
+              });
+
+            document
+              .getElementById("btn-convert")
+              ?.addEventListener("click", handleConvert);
+
+            if (canAddMore) bindDropzone();
+            break;
+          }
+
+          case "processing": {
+            const label =
+              state.jobStatus === "processing" ? "Processing" : "Queued";
+            const badgeClass =
+              state.jobStatus === "processing" ? "processing" : "";
+            card.innerHTML = `
+            <div class="processing-panel">
+              <div class="spinner"></div>
+              <h2>Converting your images&hellip;</h2>
+              <p>This usually takes a few seconds. Hang tight.</p>
+              <span class="status-badge ${badgeClass}">${label}</span>
+            </div>`;
+            break;
+          }
+
+          case "done": {
+            const isMerged = state.outputFiles.length === 1;
+            const downloadItems = state.outputFiles
+              .map(
+                (f, i) => `
+              <div class="download-item">
+                <div class="download-item-label">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                  <div class="download-item-name">${isMerged ? "images.pdf" : escHtml(`image-${i + 1}.pdf`)}</div>
+                </div>
+                <a class="btn-download" href="/api/file/${escHtml(f.id)}/download" download="${isMerged ? "images.pdf" : `image-${i + 1}.pdf`}">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Download
+                </a>
+              </div>`,
+              )
+              .join("");
+
+            card.innerHTML = `
+            <div class="done-panel">
+              <div class="done-header">
+                <div class="done-icon">
+                  <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                  <h2>Conversion complete</h2>
+                  <p>${state.outputFiles.length === 1 ? "Your PDF is ready to download." : `${state.outputFiles.length} PDFs are ready to download.`}</p>
+                </div>
+              </div>
+              <div class="download-list">${downloadItems}</div>
+              <button class="btn-again" id="btn-again">Convert more images</button>
+            </div>`;
+            document
+              .getElementById("btn-again")
+              .addEventListener("click", reset);
+            break;
+          }
+
+          case "error":
+            card.innerHTML = `
+            <div class="error-panel">
+              <div class="error-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <h2>Something went wrong</h2>
+              <p>${escHtml(state.error || "An unexpected error occurred. Please try again.")}</p>
+              <button class="btn-retry" id="btn-retry">Try again</button>
+            </div>`;
+            document
+              .getElementById("btn-retry")
+              .addEventListener("click", reset);
+            break;
+        }
+      }
+
+      // ── Dropzone bindings ──────────────────────────────────
+      function bindDropzone() {
+        const zone = document.getElementById("dropzone");
+        const browseBtn = document.getElementById("browse-btn");
+        const fileInput = document.getElementById("file-input");
+        if (!zone) return;
+
+        zone.addEventListener("click", () => fileInput.click());
+        browseBtn?.addEventListener("click", (e) => {
+          e.stopPropagation();
+          fileInput.click();
+        });
+
+        zone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          zone.classList.add("drag-over");
+        });
+        zone.addEventListener("dragleave", () =>
+          zone.classList.remove("drag-over"),
+        );
+        zone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          zone.classList.remove("drag-over");
+          if (e.dataTransfer.files.length)
+            handleFilesChosen(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener("change", () => {
+          if (fileInput.files.length) handleFilesChosen(fileInput.files);
+          fileInput.value = "";
+        });
+      }
+
+      // ── Boot ───────────────────────────────────────────────
+      render();
+    </script>
+  </body>
+</html>
