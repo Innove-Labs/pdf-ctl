@@ -1,3 +1,9 @@
 /DB
 /uploads
 .env
+node_modules
+.next
+out
+_next
+web
+LOCAL_SCRIPTS.md
