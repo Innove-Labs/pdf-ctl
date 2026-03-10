@@ -10,7 +10,7 @@ RSYNC_SSH="rsync -az -e 'ssh -i $KEY'"
 
 echo "==> Building frontend..."
 cd frontend
-npm run deploy   # builds Next.js and copies output to ../web/
+npm run deploy
 cd ..
 
 echo "==> Building Go binary (linux/amd64)..."
