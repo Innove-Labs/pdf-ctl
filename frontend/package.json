@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "deploy": "next build && cp -r out/* ../web/"
+    "deploy": "mkdir ../web && next build && cp -r out/* ../web/"
   },
   "dependencies": {
     "next": "14.2.29",
