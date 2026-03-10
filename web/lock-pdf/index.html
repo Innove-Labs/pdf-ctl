@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Split PDF - PdfCtl</title>
+    <title>Lock PDF — pdfctl</title>
     <meta
       name="description"
-      content="Split a PDF by page range, every N pages, at specific page numbers, or into individual pages. Free, private, no sign-up required."
+      content="Password-protect your PDF files. Free, private, no sign-up required."
     />
     <style>
       *,
@@ -155,21 +155,29 @@
         overflow: hidden;
       }
 
+      /* ── File panel ── */
+      .file-panel {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
       /* ── Dropzone ── */
       .dropzone {
-        padding: 56px 32px;
+        padding: 40px 32px;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 12px;
         cursor: pointer;
         border: 2px dashed var(--border);
-        border-radius: var(--radius);
+        border-radius: var(--radius-sm);
         transition:
           border-color 0.15s,
           background 0.15s;
         text-align: center;
-        background: var(--surface);
+        background: var(--bg);
       }
       .dropzone:hover,
       .dropzone.drag-over {
@@ -177,18 +185,18 @@
         background: var(--accent-soft);
       }
       .dropzone-icon {
-        width: 52px;
-        height: 52px;
-        background: var(--bg);
-        border-radius: 12px;
+        width: 44px;
+        height: 44px;
+        background: var(--surface);
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
         border: 1px solid var(--border);
       }
       .dropzone-icon svg {
-        width: 26px;
-        height: 26px;
+        width: 22px;
+        height: 22px;
         fill: none;
         stroke: var(--text-muted);
         stroke-width: 1.6;
@@ -196,12 +204,12 @@
         stroke-linejoin: round;
       }
       .dropzone h2 {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 700;
         color: var(--text-primary);
       }
       .dropzone p {
-        font-size: 14px;
+        font-size: 13px;
         color: var(--text-secondary);
       }
       .dropzone .browse-link {
@@ -213,93 +221,14 @@
       .dropzone .file-hint {
         font-size: 12px;
         color: var(--text-muted);
-        margin-top: 4px;
+        margin-top: 2px;
       }
       #file-input {
         display: none;
       }
 
-      /* ── File panel ── */
-      .file-panel {
-        padding: 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      .file-info {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 16px;
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-      }
-      .file-thumb {
-        width: 40px;
-        height: 40px;
-        background: var(--accent-soft);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-      }
-      .file-thumb svg {
-        width: 20px;
-        height: 20px;
-        fill: none;
-        stroke: var(--accent);
-        stroke-width: 1.8;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-      }
-      .file-meta {
-        flex: 1;
-        min-width: 0;
-      }
-      .file-name {
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--text-primary);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .file-size {
-        font-size: 12px;
-        color: var(--text-muted);
-        margin-top: 1px;
-      }
-      .btn-remove {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 4px;
-        color: var(--text-muted);
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        transition:
-          color 0.15s,
-          background 0.15s;
-      }
-      .btn-remove:hover {
-        color: var(--red);
-        background: var(--red-soft);
-      }
-      .btn-remove svg {
-        width: 16px;
-        height: 16px;
-        fill: none;
-        stroke: currentColor;
-        stroke-width: 2;
-        stroke-linecap: round;
-      }
-
-      /* ── Mode selector ── */
-      .mode-section label.section-label {
+      /* ── File list ── */
+      .section-label {
         display: block;
         font-size: 13px;
         font-weight: 600;
@@ -309,206 +238,205 @@
         letter-spacing: 0.5px;
       }
 
-      .mode-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+      .file-list {
+        display: flex;
+        flex-direction: column;
         gap: 8px;
       }
 
-      .mode-card {
-        position: relative;
-        cursor: pointer;
-      }
-      .mode-card input[type="radio"] {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .mode-card-inner {
+      .file-row {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         gap: 10px;
-        padding: 14px;
-        border: 1.5px solid var(--border);
-        border-radius: var(--radius-sm);
+        padding: 12px 14px;
         background: var(--bg);
-        transition:
-          border-color 0.15s,
-          background 0.15s;
-        cursor: pointer;
-        user-select: none;
-      }
-      .mode-card input[type="radio"]:checked + .mode-card-inner {
-        border-color: var(--accent);
-        background: var(--accent-soft);
-      }
-      .mode-card-inner:hover {
-        border-color: #93c5fd;
-        background: var(--accent-soft);
-      }
-      .mode-card-dot {
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        border: 2px solid var(--border);
-        background: var(--surface);
-        flex-shrink: 0;
-        margin-top: 1px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
         transition: border-color 0.15s;
+      }
+      .file-row.uploading-row {
+        opacity: 0.7;
+      }
+
+      .file-order {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-muted);
+        width: 20px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      .file-thumb {
+        width: 34px;
+        height: 34px;
+        background: var(--accent-soft);
+        border-radius: 7px;
         display: flex;
         align-items: center;
         justify-content: center;
-      }
-      .mode-card input[type="radio"]:checked + .mode-card-inner .mode-card-dot {
-        border-color: var(--accent);
-        background: var(--accent);
-      }
-      .mode-card
-        input[type="radio"]:checked
-        + .mode-card-inner
-        .mode-card-dot::after {
-        content: "";
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #fff;
-      }
-      .mode-card-text strong {
-        display: block;
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--text-primary);
-        line-height: 1.3;
-      }
-      .mode-card-text span {
-        font-size: 12px;
-        color: var(--text-secondary);
-        line-height: 1.4;
-      }
-
-      /* ── Mode params ── */
-      .mode-params {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-      .mode-params[hidden] {
-        display: none;
-      }
-      .param-label {
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--text-secondary);
-        display: block;
-        margin-bottom: 6px;
-      }
-      .param-row {
-        display: flex;
-        gap: 10px;
-      }
-      .param-input {
-        flex: 1;
-        padding: 10px 12px;
-        border: 1.5px solid var(--border);
-        border-radius: var(--radius-sm);
-        font-size: 14px;
-        color: var(--text-primary);
-        background: var(--bg);
-        transition: border-color 0.15s;
-        outline: none;
-        font-family: inherit;
-      }
-      .param-input:focus {
-        border-color: var(--accent);
-        background: var(--surface);
-      }
-      .param-input::placeholder {
-        color: var(--text-muted);
-      }
-      .param-hint {
-        font-size: 12px;
-        color: var(--text-muted);
-        margin-top: 2px;
-      }
-
-      /* ── Range rows ── */
-      .range-rows {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-      .range-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .range-row .param-input {
-        width: 0; /* flex overrides */
-      }
-      .range-sep {
-        font-size: 13px;
-        color: var(--text-muted);
         flex-shrink: 0;
       }
-      .btn-remove-range {
+      .file-thumb svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .file-thumb.uploading {
+        background: var(--bg);
+      }
+      .file-thumb.uploading svg {
+        stroke: var(--text-muted);
+      }
+
+      .file-meta {
+        flex: 1;
+        min-width: 0;
+      }
+      .file-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .file-status {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 1px;
+      }
+      .file-status.ready {
+        color: var(--green);
+      }
+
+      .row-actions {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        flex-shrink: 0;
+      }
+
+      .btn-icon {
         background: none;
         border: none;
         cursor: pointer;
-        padding: 6px;
+        padding: 5px;
         color: var(--text-muted);
         border-radius: 4px;
         display: flex;
         align-items: center;
-        flex-shrink: 0;
         transition:
           color 0.15s,
           background 0.15s;
       }
-      .btn-remove-range:hover {
+      .btn-icon:hover {
+        color: var(--text-primary);
+        background: var(--border);
+      }
+      .btn-icon.remove:hover {
         color: var(--red);
         background: var(--red-soft);
       }
-      .btn-remove-range svg {
+      .btn-icon svg {
         width: 14px;
         height: 14px;
         fill: none;
         stroke: currentColor;
         stroke-width: 2;
         stroke-linecap: round;
+        stroke-linejoin: round;
       }
-      .btn-add-range {
-        display: inline-flex;
-        align-items: center;
+      .btn-icon:disabled {
+        opacity: 0.3;
+        cursor: default;
+        pointer-events: none;
+      }
+
+      /* ── Inline spinner ── */
+      .spinner-sm {
+        width: 14px;
+        height: 14px;
+        border: 2px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        flex-shrink: 0;
+      }
+
+      /* ── Password field ── */
+      .password-group {
+        display: flex;
+        flex-direction: column;
         gap: 6px;
-        background: none;
-        border: 1.5px dashed var(--border);
-        border-radius: var(--radius-sm);
-        padding: 8px 14px;
+      }
+      .password-group label {
         font-size: 13px;
         font-weight: 600;
         color: var(--text-secondary);
-        cursor: pointer;
-        transition:
-          border-color 0.15s,
-          color 0.15s;
-        align-self: flex-start;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
-      .btn-add-range:hover {
+      .password-input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .password-input-wrap input {
+        width: 100%;
+        padding: 11px 44px 11px 14px;
+        font-size: 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--bg);
+        color: var(--text-primary);
+        outline: none;
+        transition: border-color 0.15s;
+        font-family: inherit;
+      }
+      .password-input-wrap input:focus {
         border-color: var(--accent);
-        color: var(--accent);
+        background: var(--surface);
       }
-      .btn-add-range svg {
-        width: 14px;
-        height: 14px;
+      .password-input-wrap input::placeholder {
+        color: var(--text-muted);
+      }
+      .btn-toggle-pw {
+        position: absolute;
+        right: 10px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        color: var(--text-muted);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        transition: color 0.15s;
+      }
+      .btn-toggle-pw:hover {
+        color: var(--text-primary);
+      }
+      .btn-toggle-pw svg {
+        width: 16px;
+        height: 16px;
         fill: none;
         stroke: currentColor;
-        stroke-width: 2.5;
+        stroke-width: 1.8;
         stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .password-hint {
+        font-size: 12px;
+        color: var(--text-muted);
       }
 
       /* ── Action button ── */
-      .btn-split {
+      .btn-action {
         width: 100%;
         padding: 14px;
         background: var(--accent);
@@ -520,17 +448,22 @@
         cursor: pointer;
         transition:
           background 0.15s,
-          transform 0.1s;
+          transform 0.1s,
+          opacity 0.15s;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
       }
-      .btn-split:hover {
+      .btn-action:hover:not(:disabled) {
         background: var(--accent-hover);
         transform: translateY(-1px);
       }
-      .btn-split svg {
+      .btn-action:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-action svg {
         width: 16px;
         height: 16px;
         fill: none;
@@ -630,9 +563,10 @@
       .download-list {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
         margin-bottom: 20px;
       }
+
       .download-item {
         display: flex;
         align-items: center;
@@ -661,11 +595,6 @@
       .download-item-name {
         font-size: 14px;
         font-weight: 600;
-      }
-      .download-item-pos {
-        font-size: 12px;
-        color: var(--text-muted);
-        margin-top: 1px;
       }
       .btn-download {
         display: inline-flex;
@@ -786,10 +715,7 @@
           padding: 32px 16px 60px;
         }
         .dropzone {
-          padding: 40px 20px;
-        }
-        .mode-grid {
-          grid-template-columns: 1fr;
+          padding: 32px 16px;
         }
       }
     </style>
@@ -815,18 +741,13 @@
       <div class="page-header">
         <div class="page-icon">
           <svg viewBox="0 0 24 24">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" y1="3" x2="12" y2="15" />
-            <line x1="3" y1="12" x2="21" y2="12" />
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
         </div>
         <div>
-          <h1>Split PDF</h1>
-          <p>
-            Break a document into parts; by range, page count, or
-            specific cuts.
-          </p>
+          <h1>Lock PDF</h1>
+          <p>Password-protect your PDFs so only authorised readers can open them.</p>
         </div>
       </div>
 
@@ -850,14 +771,19 @@
       </div>
     </footer>
 
-    <input type="file" id="file-input" accept=".pdf,application/pdf" />
+    <input type="file" id="file-input" accept=".pdf,application/pdf" multiple />
 
     <script>
+      // ── Constants ──────────────────────────────────────────
+      const MAX_FILES = 10;
+      const MAX_TOTAL_BYTES = 50 * 1024 * 1024; // 50 MB
+
       // ── State ──────────────────────────────────────────────
+      // Each entry: { file: File, fileId: string|null, uploading: bool }
       const state = {
-        phase: "idle", // idle | uploading | ready | processing | done | error
-        file: null,
-        fileId: null,
+        phase: "idle", // idle | ready | processing | done | error
+        files: [],
+        password: "",
         jobId: null,
         jobStatus: null,
         outputFiles: [],
@@ -891,8 +817,8 @@
         stopPolling();
         Object.assign(state, {
           phase: "idle",
-          file: null,
-          fileId: null,
+          files: [],
+          password: "",
           jobId: null,
           jobStatus: null,
           outputFiles: [],
@@ -901,7 +827,19 @@
         render();
       }
 
-      // ── API calls ──────────────────────────────────────────
+      function totalBytes() {
+        return state.files.reduce((sum, e) => sum + e.file.size, 0);
+      }
+
+      function allReady() {
+        return (
+          state.files.length >= 1 &&
+          state.files.every((f) => f.fileId && !f.uploading) &&
+          state.password.trim().length > 0
+        );
+      }
+
+      // ── API ────────────────────────────────────────────────
       async function uploadFile(file) {
         const form = new FormData();
         form.append("file", file);
@@ -911,11 +849,18 @@
         return res.json();
       }
 
-      async function createSplitJob(payload) {
-        const res = await fetch("/api/jobs/split", {
+      async function createEncryptJob() {
+        const body = {
+          files: state.files.map((f, i) => ({
+            file_id: f.fileId,
+            position: i + 1,
+          })),
+          password: state.password,
+        };
+        const res = await fetch("/api/jobs/encrypt", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(body),
         });
         if (!res.ok)
           throw new Error((await res.json()).error || "Failed to create job");
@@ -929,113 +874,75 @@
         return res.json();
       }
 
-      // ── Collect & validate params ──────────────────────────
-      function collectParams() {
-        const mode = document.querySelector(
-          'input[name="mode"]:checked',
-        )?.value;
-        if (!mode) return { err: "Please select a split mode." };
-
-        const payload = { file_id: state.fileId, mode };
-
-        if (mode === "n-pages") {
-          const n = parseInt(
-            document.getElementById("param-n-pages").value,
-            10,
-          );
-          if (!n || n < 1)
-            return { err: "Enter a valid number of pages (≥ 1)." };
-          payload.n_pages = n;
-        }
-
-        if (mode === "pages") {
-          const raw = document.getElementById("param-pages").value.trim();
-          if (!raw) return { err: "Enter at least one page number." };
-          const pages = raw.split(",").map((s) => parseInt(s.trim(), 10));
-          if (pages.some(isNaN) || pages.some((p) => p < 1)) {
-            return {
-              err: "Page numbers must be positive integers, separated by commas.",
-            };
-          }
-          payload.pages = pages;
-        }
-
-        if (mode === "range") {
-          const rows = document.querySelectorAll("#range-rows .range-row");
-          const ranges = [];
-          for (let i = 0; i < rows.length; i++) {
-            const from = parseInt(
-              rows[i].querySelector("[data-range-from]").value,
-              10,
-            );
-            const to = parseInt(
-              rows[i].querySelector("[data-range-to]").value,
-              10,
-            );
-            if (!from || from < 1)
-              return { err: `Range ${i + 1}: "From" must be ≥ 1.` };
-            if (!to || to < from)
-              return { err: `Range ${i + 1}: "To" must be ≥ "From".` };
-            ranges.push({ from, to });
-          }
-          if (ranges.length === 0)
-            return { err: "Add at least one page range." };
-          payload.ranges = ranges;
-        }
-
-        return { payload };
-      }
-
       // ── Actions ────────────────────────────────────────────
-      async function handleFileChosen(file) {
-        if (!file || file.type !== "application/pdf") {
-          state.error = "Please select a valid PDF file.";
+      async function handleFilesChosen(fileList) {
+        const pdfs = Array.from(fileList).filter(
+          (f) => f.type === "application/pdf",
+        );
+        if (pdfs.length === 0) return;
+
+        const remaining = MAX_FILES - state.files.length;
+        if (remaining <= 0) {
+          state.error = `Maximum of ${MAX_FILES} files allowed.`;
           state.phase = "error";
           render();
           return;
         }
-        if (file.size > 50 * 1024 * 1024) {
-          state.error = "File is too large. Maximum size is 50 MB.";
+
+        const toAdd = pdfs.slice(0, remaining);
+        const newTotal = totalBytes() + toAdd.reduce((s, f) => s + f.size, 0);
+        if (newTotal > MAX_TOTAL_BYTES) {
+          state.error = "Total size of all files cannot exceed 50 MB.";
           state.phase = "error";
           render();
           return;
         }
-        state.file = file;
-        state.phase = "uploading";
+
+        for (const file of toAdd) {
+          state.files.push({ file, fileId: null, uploading: true });
+        }
+        state.phase = "ready";
         render();
 
-        try {
-          const data = await uploadFile(file);
-          state.fileId = data.id;
-          state.phase = "ready";
-        } catch (e) {
-          state.error = e.message;
-          state.phase = "error";
+        for (let i = 0; i < state.files.length; i++) {
+          const entry = state.files[i];
+          if (entry.uploading && !entry.fileId) {
+            try {
+              const data = await uploadFile(entry.file);
+              entry.fileId = data.id;
+              entry.uploading = false;
+            } catch (e) {
+              state.error = e.message;
+              state.phase = "error";
+              render();
+              return;
+            }
+            render();
+          }
         }
+      }
+
+      function removeFile(index) {
+        state.files.splice(index, 1);
+        if (state.files.length === 0) state.phase = "idle";
         render();
       }
 
-      async function handleSplit() {
-        const { payload, err } = collectParams();
-        if (err) {
-          // surface inline without losing mode selection
-          const existing = document.getElementById("inline-error");
-          if (existing) existing.remove();
-          const el = document.createElement("p");
-          el.id = "inline-error";
-          el.style.cssText =
-            "font-size:13px;color:var(--red);margin-top:-8px;padding:0 0 4px";
-          el.textContent = err;
-          document.getElementById("btn-split").before(el);
-          return;
-        }
+      function handlePasswordInput(value) {
+        state.password = value;
+        const btn = document.getElementById("btn-lock");
+        if (btn) btn.disabled = !allReady();
+      }
+
+      async function handleLock() {
+        if (!allReady()) return;
 
         state.phase = "processing";
         state.jobStatus = "pending";
         render();
 
         try {
-          const job = await createSplitJob(payload);
+          const job = await createEncryptJob();
           state.jobId = job.job_id;
 
           state.pollTimer = setInterval(async () => {
@@ -1051,7 +958,7 @@
               } else if (data.status === "failed") {
                 stopPolling();
                 state.error =
-                  "Split failed. The file may be corrupted or the page range is out of bounds.";
+                  "Encryption failed. One or more files may be corrupted or already encrypted.";
                 state.phase = "error";
                 render();
               } else {
@@ -1087,185 +994,123 @@
                   <polyline points="9 16 12 19 15 16"/>
                 </svg>
               </div>
-              <h2>Drop your PDF here</h2>
+              <h2>Drop your PDFs here</h2>
               <p>or <span class="browse-link" id="browse-btn">browse to upload</span></p>
-              <p class="file-hint">PDF files only &mdash; up to 50 MB</p>
+              <p class="file-hint">PDF files only &mdash; up to ${MAX_FILES} files &mdash; 50 MB total</p>
             </div>`;
             bindDropzone();
             break;
 
-          case "uploading":
-            card.innerHTML = `
-            <div class="processing-panel">
-              <div class="spinner"></div>
-              <h2>Uploading&hellip;</h2>
-              <p>Sending <strong>${escHtml(state.file.name)}</strong> to the server.</p>
-            </div>`;
-            break;
-
-          case "ready":
-            card.innerHTML = `
-            <div class="file-panel">
-              <div class="file-info">
-                <div class="file-thumb">
+          case "ready": {
+            const fileItems = state.files
+              .map((entry, i) => {
+                const isUploading = entry.uploading;
+                const isReady = !isUploading && entry.fileId;
+                return `
+              <div class="file-row${isUploading ? " uploading-row" : ""}">
+                <span class="file-order">${i + 1}</span>
+                <div class="file-thumb${isUploading ? " uploading" : ""}">
                   <svg viewBox="0 0 24 24">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
                   </svg>
                 </div>
                 <div class="file-meta">
-                  <div class="file-name">${escHtml(state.file.name)}</div>
-                  <div class="file-size">${fmtBytes(state.file.size)}</div>
-                </div>
-                <button class="btn-remove" id="btn-remove" title="Remove file">
-                  <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-              </div>
-
-              <div class="mode-section">
-                <label class="section-label">Split mode</label>
-                <div class="mode-grid">
-
-                  <label class="mode-card">
-                    <input type="radio" name="mode" value="all" checked />
-                    <div class="mode-card-inner">
-                      <div class="mode-card-dot"></div>
-                      <div class="mode-card-text">
-                        <strong>Every page</strong>
-                        <span>One PDF per page</span>
-                      </div>
-                    </div>
-                  </label>
-
-                  <label class="mode-card">
-                    <input type="radio" name="mode" value="n-pages" />
-                    <div class="mode-card-inner">
-                      <div class="mode-card-dot"></div>
-                      <div class="mode-card-text">
-                        <strong>Every N pages</strong>
-                        <span>Equal chunks of N</span>
-                      </div>
-                    </div>
-                  </label>
-
-                  <label class="mode-card">
-                    <input type="radio" name="mode" value="pages" />
-                    <div class="mode-card-inner">
-                      <div class="mode-card-dot"></div>
-                      <div class="mode-card-text">
-                        <strong>At page numbers</strong>
-                        <span>Split at specific cuts</span>
-                      </div>
-                    </div>
-                  </label>
-
-                  <label class="mode-card">
-                    <input type="radio" name="mode" value="range" />
-                    <div class="mode-card-inner">
-                      <div class="mode-card-dot"></div>
-                      <div class="mode-card-text">
-                        <strong>Page ranges</strong>
-                        <span>One or more from–to ranges</span>
-                      </div>
-                    </div>
-                  </label>
-
-                </div>
-              </div>
-
-              <div id="params-n-pages" class="mode-params" hidden>
-                <label class="param-label" for="param-n-pages">Pages per chunk</label>
-                <input class="param-input" id="param-n-pages" type="number" min="1" placeholder="e.g. 5" />
-                <p class="param-hint">The PDF will be split into groups of this many pages.</p>
-              </div>
-
-              <div id="params-pages" class="mode-params" hidden>
-                <label class="param-label" for="param-pages">Split at page numbers</label>
-                <input class="param-input" id="param-pages" type="text" placeholder="e.g. 3, 7, 12" />
-                <p class="param-hint">Comma-separated page numbers where the PDF will be cut.</p>
-              </div>
-
-              <div id="params-range" class="mode-params" hidden>
-                <label class="param-label">Page ranges</label>
-                <div class="range-rows" id="range-rows">
-                  <div class="range-row">
-                    <input class="param-input" type="number" min="1" placeholder="From" data-range-from />
-                    <span class="range-sep">to</span>
-                    <input class="param-input" type="number" min="1" placeholder="To" data-range-to />
-                    <button class="btn-remove-range" type="button" title="Remove range" style="visibility:hidden">
-                      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
+                  <div class="file-name">${escHtml(entry.file.name)}</div>
+                  <div class="file-status${isReady ? " ready" : ""}">
+                    ${isUploading ? "Uploading&hellip;" : isReady ? "Ready" : fmtBytes(entry.file.size)}
                   </div>
                 </div>
-                <button class="btn-add-range" type="button" id="btn-add-range">
-                  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  Add range
-                </button>
-                <p class="param-hint">Each range produces a separate output PDF.</p>
+                ${isUploading ? '<div class="spinner-sm"></div>' : ""}
+                <div class="row-actions">
+                  <button class="btn-icon remove" data-remove="${i}" title="Remove">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>`;
+              })
+              .join("");
+
+            const canAddMore = state.files.length < MAX_FILES;
+            const ready = allReady();
+
+            card.innerHTML = `
+            <div class="file-panel">
+              <div>
+                <span class="section-label">Files to lock (${state.files.length}/${MAX_FILES})</span>
+                <div class="file-list">${fileItems}</div>
               </div>
 
-              <button class="btn-split" id="btn-split">
+              ${canAddMore ? `
+              <div class="dropzone" id="dropzone" style="padding:24px 20px;">
+                <div class="dropzone-icon">
+                  <svg viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                </div>
+                <p>Add more PDFs &mdash; <span class="browse-link" id="browse-btn">browse</span> or drop here</p>
+              </div>` : ""}
+
+              <div class="password-group">
+                <label for="pw-input">Password</label>
+                <div class="password-input-wrap">
+                  <input
+                    type="password"
+                    id="pw-input"
+                    placeholder="Enter a strong password"
+                    autocomplete="new-password"
+                    value="${escHtml(state.password)}"
+                  />
+                  <button class="btn-toggle-pw" id="btn-toggle-pw" type="button" title="Show / hide password">
+                    <svg id="pw-eye" viewBox="0 0 24 24">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </button>
+                </div>
+                <p class="password-hint">Make sure to remember this password &mdash; it cannot be recovered.</p>
+              </div>
+
+              <button class="btn-action" id="btn-lock" ${ready ? "" : "disabled"}>
                 <svg viewBox="0 0 24 24">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="17 8 12 3 7 8"/>
-                  <line x1="12" y1="3" x2="12" y2="15"/>
-                  <line x1="3" y1="12" x2="21" y2="12"/>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
-                Split PDF
+                Lock PDF${state.files.length > 1 ? "s" : ""}
               </button>
             </div>`;
 
-            document
-              .getElementById("btn-remove")
-              .addEventListener("click", reset);
-            document
-              .getElementById("btn-split")
-              .addEventListener("click", handleSplit);
-
-            // Show/hide param panels on mode change
-            document.querySelectorAll('input[name="mode"]').forEach((radio) => {
-              radio.addEventListener("change", () => {
-                document.getElementById("params-n-pages").hidden =
-                  radio.value !== "n-pages";
-                document.getElementById("params-pages").hidden =
-                  radio.value !== "pages";
-                document.getElementById("params-range").hidden =
-                  radio.value !== "range";
-              });
+            card.querySelectorAll("[data-remove]").forEach((btn) => {
+              btn.addEventListener("click", () =>
+                removeFile(parseInt(btn.dataset.remove, 10)),
+              );
             });
 
-            // Add/remove range rows
-            document
-              .getElementById("btn-add-range")
-              .addEventListener("click", () => {
-                const container = document.getElementById("range-rows");
-                const row = document.createElement("div");
-                row.className = "range-row";
-                row.innerHTML = `
-                <input class="param-input" type="number" min="1" placeholder="From" data-range-from />
-                <span class="range-sep">to</span>
-                <input class="param-input" type="number" min="1" placeholder="To" data-range-to />
-                <button class="btn-remove-range" type="button" title="Remove range">
-                  <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>`;
-                row
-                  .querySelector(".btn-remove-range")
-                  .addEventListener("click", () => {
-                    row.remove();
-                    syncRemoveButtons();
-                  });
-                container.appendChild(row);
-                syncRemoveButtons();
-              });
+            const pwInput = document.getElementById("pw-input");
+            pwInput.addEventListener("input", () =>
+              handlePasswordInput(pwInput.value),
+            );
 
-            function syncRemoveButtons() {
-              const rows = document.querySelectorAll("#range-rows .range-row");
-              rows.forEach((r) => {
-                const btn = r.querySelector(".btn-remove-range");
-                btn.style.visibility = rows.length > 1 ? "visible" : "hidden";
-              });
-            }
+            const toggleBtn = document.getElementById("btn-toggle-pw");
+            toggleBtn.addEventListener("click", () => {
+              const isHidden = pwInput.type === "password";
+              pwInput.type = isHidden ? "text" : "password";
+              document.getElementById("pw-eye").innerHTML = isHidden
+                ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                   <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                   <line x1="1" y1="1" x2="23" y2="23"/>`
+                : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                   <circle cx="12" cy="12" r="3"/>`;
+            });
+
+            document
+              .getElementById("btn-lock")
+              ?.addEventListener("click", handleLock);
+
+            if (canAddMore) bindDropzone();
             break;
+          }
 
           case "processing": {
             const label =
@@ -1275,7 +1120,7 @@
             card.innerHTML = `
             <div class="processing-panel">
               <div class="spinner"></div>
-              <h2>Splitting your PDF&hellip;</h2>
+              <h2>Locking your PDF${state.files.length > 1 ? "s" : ""}&hellip;</h2>
               <p>This usually takes a few seconds. Hang tight.</p>
               <span class="status-badge ${badgeClass}">${label}</span>
             </div>`;
@@ -1283,24 +1128,22 @@
           }
 
           case "done": {
-            const sorted = [...state.outputFiles].sort(
-              (a, b) => a.position - b.position,
-            );
-            const items = sorted
-              .map(
-                (f, i) => `
+            const downloadItems = state.outputFiles
+              .map((f, i) => {
+                const name =
+                  state.outputFiles.length === 1
+                    ? "locked.pdf"
+                    : `locked_${i + 1}.pdf`;
+                return `
               <div class="download-item">
                 <div class="download-item-label">
                   <svg viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                   </svg>
-                  <div>
-                    <div class="download-item-name">split_${i + 1}.pdf</div>
-                    ${sorted.length > 1 ? `<div class="download-item-pos">Part ${i + 1} of ${sorted.length}</div>` : ""}
-                  </div>
+                  <div class="download-item-name">${escHtml(name)}</div>
                 </div>
-                <a class="btn-download" href="/api/file/${escHtml(f.id)}/download" download="split_${i + 1}.pdf">
+                <a class="btn-download" href="/api/file/${escHtml(f.id)}/download" download="${escHtml(name)}">
                   <svg viewBox="0 0 24 24">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="7 10 12 15 17 10"/>
@@ -1308,8 +1151,8 @@
                   </svg>
                   Download
                 </a>
-              </div>`,
-              )
+              </div>`;
+              })
               .join("");
 
             card.innerHTML = `
@@ -1319,14 +1162,13 @@
                   <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <div>
-                  <h2>Split complete</h2>
-                  <p>${sorted.length} file${sorted.length !== 1 ? "s" : ""} ready to download</p>
+                  <h2>PDF${state.outputFiles.length > 1 ? "s" : ""} locked</h2>
+                  <p>${state.outputFiles.length === 1 ? "Your password-protected PDF is ready to download." : `${state.outputFiles.length} password-protected PDFs are ready to download.`}</p>
                 </div>
               </div>
-              <div class="download-list">${items}</div>
-              <button class="btn-again" id="btn-again">Split another PDF</button>
+              <div class="download-list">${downloadItems}</div>
+              <button class="btn-again" id="btn-again">Lock more PDFs</button>
             </div>`;
-
             document
               .getElementById("btn-again")
               .addEventListener("click", reset);
@@ -1355,9 +1197,10 @@
         const zone = document.getElementById("dropzone");
         const browseBtn = document.getElementById("browse-btn");
         const fileInput = document.getElementById("file-input");
+        if (!zone) return;
 
         zone.addEventListener("click", () => fileInput.click());
-        browseBtn.addEventListener("click", (e) => {
+        browseBtn?.addEventListener("click", (e) => {
           e.stopPropagation();
           fileInput.click();
         });
@@ -1372,12 +1215,12 @@
         zone.addEventListener("drop", (e) => {
           e.preventDefault();
           zone.classList.remove("drag-over");
-          const file = e.dataTransfer.files[0];
-          if (file) handleFileChosen(file);
+          if (e.dataTransfer.files.length)
+            handleFilesChosen(e.dataTransfer.files);
         });
 
         fileInput.addEventListener("change", () => {
-          if (fileInput.files[0]) handleFileChosen(fileInput.files[0]);
+          if (fileInput.files.length) handleFilesChosen(fileInput.files);
           fileInput.value = "";
         });
       }

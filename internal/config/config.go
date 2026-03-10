@@ -108,7 +108,7 @@ func Load() *Config {
 		MaxFileSizeMB:      getEnvInt64("MAX_FILE_SIZE_MB", 50),
 		AnonMaxJobsPerHour: getEnvInt("ANON_MAX_JOBS_PER_HOUR", 5),
 		UserMaxJobsPerHour: getEnvInt("USER_MAX_JOBS_PER_HOUR", 50),
-		FileTTL:            getEnvDuration("FILE_TTL", 10*time.Minute),
+		FileTTL:            10 * time.Minute,
 		SqlLitePath:        getEnv("SQLITE_PATH", "./DB/pdfctl.db"),
 
 		MAX_WORKERS: getEnvInt("MAX_WORKERS", 5),
@@ -123,8 +123,8 @@ func Load() *Config {
 			Prefix: getEnv("STORAGE_S3_PREFIX", ""),
 		},
 
-		CleanupInterval: getEnvInt("CLEANUP_INTERVAL", 30),
-		CleanUpQuantity: getEnvInt("CLEAN_UP_QUANTITY", 2),
+		CleanupInterval: 10,
+		CleanUpQuantity: getEnvInt("CLEAN_UP_QUANTITY", 50),
 	}
 
 	cfg.validate()

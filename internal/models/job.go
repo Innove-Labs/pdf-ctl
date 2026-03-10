@@ -22,6 +22,7 @@ const (
 	OperationSplit        OperationType = "split"
 	OperationCompress     OperationType = "compress"
 	OperationConvertImage OperationType = "convertImage"
+	OperationEncrypt      OperationType = "encrypt"
 )
 
 type Job struct {

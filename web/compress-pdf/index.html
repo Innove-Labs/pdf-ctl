@@ -750,6 +750,12 @@
           render();
           return;
         }
+        if (file.size > 50 * 1024 * 1024) {
+          state.error = "File is too large. Maximum size is 50 MB.";
+          state.phase = "error";
+          render();
+          return;
+        }
         state.file = file;
         state.phase = "uploading";
         render();

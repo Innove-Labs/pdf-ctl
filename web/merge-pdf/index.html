@@ -705,6 +705,10 @@
     <input type="file" id="file-input" accept=".pdf,application/pdf" multiple />
 
     <script>
+      // ── Constants ──────────────────────────────────────────
+      const MAX_FILES = 10;
+      const MAX_TOTAL_BYTES = 50 * 1024 * 1024; // 50 MB
+
       // ── State ──────────────────────────────────────────────
       // Each entry: { file: File, fileId: string|null, uploading: bool }
       const state = {
@@ -750,6 +754,10 @@
           error: null,
         });
         render();
+      }
+
+      function totalBytes() {
+        return state.files.reduce((sum, e) => sum + e.file.size, 0);
       }
 
       function allReady() {
@@ -798,8 +806,25 @@
         );
         if (pdfs.length === 0) return;
 
+        const remaining = MAX_FILES - state.files.length;
+        if (remaining <= 0) {
+          state.error = `Maximum of ${MAX_FILES} files allowed.`;
+          state.phase = "error";
+          render();
+          return;
+        }
+
+        const toAdd = pdfs.slice(0, remaining);
+        const newTotal = totalBytes() + toAdd.reduce((s, f) => s + f.size, 0);
+        if (newTotal > MAX_TOTAL_BYTES) {
+          state.error = "Total size of all files cannot exceed 50 MB.";
+          state.phase = "error";
+          render();
+          return;
+        }
+
         // Append new entries
-        for (const file of pdfs) {
+        for (const file of toAdd) {
           state.files.push({ file, fileId: null, uploading: true });
         }
         state.phase = "ready";
@@ -903,7 +928,7 @@
               </div>
               <h2>Drop your PDFs here</h2>
               <p>or <span class="browse-link" id="browse-btn">browse to upload</span></p>
-              <p class="file-hint">PDF files only &mdash; at least 2 required &mdash; up to 50 MB each</p>
+              <p class="file-hint">PDF files only &mdash; at least 2 required &mdash; up to ${MAX_FILES} files &mdash; 50 MB total</p>
             </div>`;
             bindDropzone();
             break;

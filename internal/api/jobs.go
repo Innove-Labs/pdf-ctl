@@ -277,3 +277,59 @@ func (h *JobHandler) CreateConvertImagesToPdfJob(c *gin.Context) {
 		Status: job.Status,
 	})
 }
+
+func (h *JobHandler) CreateEncryptJob(c *gin.Context) {
+	var req types.EncryptPdfRequestParams
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if len(req.Files) > 10 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Too many files"})
+	}
+
+	jobID := uuid.New()
+
+	params := types.EncryptPdfParams{
+		Password: req.Password,
+	}
+
+	paramsJson, _ := json.Marshal(params)
+
+	job := models.Job{
+		ID:            jobID.String(),
+		OperationType: models.OperationEncrypt,
+		Params:        string(paramsJson),
+		Status:        models.StatusPending,
+	}
+
+	jobFilesArray := make([]models.JobFile, len(req.Files))
+
+	for i, j := range req.Files {
+		jobFile := models.JobFile{
+			JobID:    job.ID,
+			FileID:   j.FileID,
+			Position: j.Position,
+			Role:     models.JobFileInput,
+		}
+		jobFilesArray[i] = jobFile
+	}
+
+	if err := h.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&job).Error; err != nil {
+			return err
+		}
+		if err := tx.Create(&jobFilesArray).Error; err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	c.JSON(http.StatusCreated, JobResponse{
+		JobID:  job.ID,
+		Status: job.Status,
+	})
+}

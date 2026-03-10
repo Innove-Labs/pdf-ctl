@@ -852,6 +852,7 @@
 
     <script>
       const MAX_FILES = 10;
+      const MAX_TOTAL_BYTES = 50 * 1024 * 1024; // 50 MB
 
       const state = {
         phase: "idle", // idle | ready | processing | done | error
@@ -948,6 +949,10 @@
       }
 
       // ── Actions ────────────────────────────────────────────
+      function totalBytes() {
+        return state.files.reduce((sum, e) => sum + e.file.size, 0);
+      }
+
       async function handleFilesChosen(fileList) {
         const images = Array.from(fileList).filter((f) =>
           f.type.startsWith("image/"),
@@ -956,6 +961,14 @@
 
         const remaining = MAX_FILES - state.files.length;
         const toAdd = images.slice(0, remaining);
+
+        const newTotal = totalBytes() + toAdd.reduce((s, f) => s + f.size, 0);
+        if (newTotal > MAX_TOTAL_BYTES) {
+          state.error = "Total size of all files cannot exceed 50 MB.";
+          state.phase = "error";
+          render();
+          return;
+        }
 
         for (const file of toAdd) {
           state.files.push({
