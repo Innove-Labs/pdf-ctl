@@ -8,6 +8,7 @@ var registry = map[models.OperationType]Process{
 	models.OperationMerge:        &MergePdf{},
 	models.OperationConvertImage: &ImageToPdf{},
 	models.OperationEncrypt:      &Encrypt{},
+	models.OperationDecrypt:      &Decrypt{},
 }
 
 func Get(op models.OperationType) (Process, bool) {

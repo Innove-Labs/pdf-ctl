@@ -13,10 +13,9 @@ import (
 	"gorm.io/gorm"
 )
 
-type Encrypt struct{}
+type Decrypt struct{}
 
-func (c *Encrypt) Run(ctx Context, job *models.Job) error {
-
+func (c *Decrypt) Run(ctx Context, job *models.Job) error {
 	var params types.EncryptPdfParams
 
 	err := json.Unmarshal([]byte(job.Params), &params)
@@ -52,7 +51,7 @@ func (c *Encrypt) Run(ctx Context, job *models.Job) error {
 		}
 		defer reader.Close()
 
-		tempFileName := "pdf-ctl-encrypt-in-*" + f.Extension
+		tempFileName := "pdf-ctl-decrypt-in-*" + f.Extension
 
 		tempFile, err := os.CreateTemp("", tempFileName)
 		if err != nil {
@@ -73,9 +72,9 @@ func (c *Encrypt) Run(ctx Context, job *models.Job) error {
 	var fileOutputs []models.File
 
 	for i, j := range tempInFiles {
-		outPath := os.TempDir() + "/pdf-ctl-temp-encrypt-out-" + uuid.New().String() + ".pdf"
+		outPath := os.TempDir() + "/pdf-ctl-temp-decrypt-out-" + uuid.New().String() + ".pdf"
 		defer os.Remove(outPath)
-		if err := api.EncryptFile(j, outPath, config); err != nil {
+		if err := api.DecryptFile(j, outPath, config); err != nil {
 			return err
 		}
 		result, err := os.Open(outPath)
@@ -90,7 +89,7 @@ func (c *Encrypt) Run(ctx Context, job *models.Job) error {
 		}
 
 		outputId := uuid.New()
-		storageKey := outputId.String() + "_locked.pdf"
+		storageKey := outputId.String() + "_unlocked.pdf"
 
 		if err := ctx.Storage.Save(storageKey, result); err != nil {
 			return err
