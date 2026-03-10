@@ -71,6 +71,7 @@ func main() {
 	router.POST("/api/jobs/merge", jobHandler.CreateMergeJob)
 	router.POST("/api/jobs/convert-image-pdf", jobHandler.CreateConvertImagesToPdfJob)
 	router.POST("/api/jobs/encrypt", jobHandler.CreateEncryptJob)
+	router.POST("/api/jobs/decrypt", jobHandler.CreateDecryptJob)
 	router.POST("/api/file", fileHandler.Upload)
 	router.GET("/api/job/status/:id", jobHandler.GetJobStatus)
 	router.GET("/api/file/:id/download", fileHandler.Download)
