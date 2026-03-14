@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
 import ToolUploader from '@/components/ToolUploader';
-import { TOOLS, getToolBySlug } from '@/tools/tools';
+import { InputType, Redirectparams, TOOLS, getToolBySlug } from '@/tools/tools';
 
 interface Props {
   params: { tool: string };
@@ -31,7 +31,6 @@ export default function ToolPage({ params }: Props) {
   return (
     <Layout>
       <div className="max-w-content w-full mx-auto px-6 pt-12 pb-20">
-        {/* Breadcrumb */}
         <nav className="flex items-center gap-1.5 text-xs text-text-muted mb-8">
           <Link href="/" className="hover:text-text-primary transition-colors no-underline">
             Home
@@ -40,7 +39,6 @@ export default function ToolPage({ params }: Props) {
           <span className="text-text-secondary">{tool.title}</span>
         </nav>
 
-        {/* Page header */}
         <div className="flex items-start gap-4 mb-8">
           <div
             className={`w-12 h-12 ${tool.iconColor} rounded-[10px] flex items-center justify-center flex-shrink-0 mt-0.5`}
@@ -66,8 +64,8 @@ export default function ToolPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Interactive uploader — client component island */}
-        <ToolUploader tool={tool} />
+        { tool.inputType === "redirect" && <Link className="text-white no-underline" href={(tool.params as { target: Redirectparams}).target.path} target='_blank'><button className='inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent !text-white font-semibold text-sm shadow-md hover:bg-accent-hover active:scale-95 transition-all duration-150'>{(tool.params as { target: Redirectparams }).target.title}</button> </Link>}
+        { (["multiple-image", "multiple-pdf", "single-pdf"] as InputType[]).includes(tool.inputType) && <ToolUploader tool={tool} /> }
 
         {/* How-to section */}
         <section className="mt-12">
@@ -91,7 +89,6 @@ export default function ToolPage({ params }: Props) {
           </ol>
         </section>
 
-        {/* FAQ section */}
         <section className="mt-12">
           <h2 className="text-lg font-bold tracking-tight mb-5">
             Frequently asked questions
@@ -108,7 +105,6 @@ export default function ToolPage({ params }: Props) {
           </div>
         </section>
 
-        {/* Related tools */}
         {relatedTools.length > 0 && (
           <section className="mt-12">
             <h2 className="text-lg font-bold tracking-tight mb-5">

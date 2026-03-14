@@ -1,4 +1,4 @@
-export type InputType = 'single-pdf' | 'multiple-pdf' | 'multiple-image';
+export type InputType = 'single-pdf' | 'multiple-pdf' | 'multiple-image' | 'redirect'
 
 // export type SplitMode = 'range' | 'every_n' | 'individual' | 'fixed_ranges';
 export type SplitMode = 'pages' | 'n-pages' | 'all' | 'range';
@@ -22,11 +22,17 @@ export interface ConvertImageParams {
   merge_into_one: boolean;
 }
 
+export interface Redirectparams {
+  path: string;
+  title: string;
+}
+
 export type ToolParams =
   | { type: 'none' }
   | { type: 'password' }
   | { type: 'split'; defaults: SplitParams }
-  | { type: 'convert-image'; defaults: ConvertImageParams };
+  | { type: 'convert-image'; defaults: ConvertImageParams }
+  | { type: 'redirect'; target: Redirectparams  };
 
 export interface HowToStep {
   step: number;
@@ -407,6 +413,67 @@ export const TOOLS: ToolMeta[] = [
     processingMessage: 'Converting your images…',
     completionMessage: 'Conversion complete',
   },
+  {
+    slug: 'edit-pdf',
+    title: 'Edit PDF',
+    tagline: 'Add Images, Texts etc to the PDF',
+    metaDescription:
+      'Add Images, Texts etc to the PDF',
+    operation: 'edit-pdf',
+    inputType: 'redirect',
+    params: {
+      type: 'redirect',
+      target: {
+        path: "/edit-pdf-worker",
+        title: "Go to Edit PDF"
+      }
+    },
+    iconColor: 'bg-purple-50',
+    iconStroke: 'text-purple-600',
+    iconSvgPath:
+      '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+    howTo: [
+      {
+        step: 1,
+        title: 'Click on the Edit PDF button',
+        description:
+          'Yes, the big red button',
+      },
+      {
+        step: 2,
+        title: 'You will be redirected to the pdf editor in a new tab',
+        description:
+          'Here you can upload your pdf and perform actions like reorder, rotate, add text, image etc',
+      },
+      {
+        step: 3,
+        title: 'Click on download',
+        description:
+          'After you are done with editing, click on the download button',
+      },
+    ],
+    faq: [
+      {
+        question: 'Will my file be saved in the server?',
+        answer: 'No. Pdf editor runs on your browser. It does not send any data to the server',
+      },
+      {
+        question: 'Is the pdf editor limited?',
+        answer:
+          'No, all the pdf editor features are free.',
+      },
+      {
+        question: 'Can I download the edited pdf?',
+        answer:
+          'Yes, you can download the edited pdf whenever you want.',
+      }
+    ],
+    relatedSlugs: ['compress-pdf', 'merge-pdf', 'split-pdf'],
+    actionLabel: 'Edit PDF',
+    processingMessage: '',
+    completionMessage: '',
+
+  }
 ];
 
 export function getToolBySlug(slug: string): ToolMeta | undefined {

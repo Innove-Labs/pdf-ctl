@@ -3,11 +3,11 @@ import '../styles/globals.css';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s — pdfctl',
+    template: '%s - pdfctl',
     default: 'pdfctl: Privacy focused PDF tools',
   },
   description:
-    'Compress, split, merge and convert PDFs in seconds. No account, no watermarks, no data sharing.',
+    'Compress, split, merge, convert and edit PDFs in seconds. No account, no watermarks, no data sharing.',
 };
 
 export default function RootLayout({
