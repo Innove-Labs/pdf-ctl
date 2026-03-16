@@ -8,6 +8,7 @@
     "deploy": "mkdir ../web && next build && cp -r out/* ../web/"
   },
   "dependencies": {
+    "@next/third-parties": "^16.1.6",
     "fabric": "^5.5.2",
     "next": "14.2.29",
     "pdf-lib": "^1.17.1",
